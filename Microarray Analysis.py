@@ -4,26 +4,25 @@
 def readInData(prompt):
     
     data = "";
-    not_read = True
+    notRead = True
     
-    while (not_read):
+    while (notRead):
         
         try:
             
-            file_name = input(prompt);
+            fileName = input(prompt);
             
-            with open(file_name, "r") as file:
+            with open(fileName, "r") as file:
                 for line in file:
                     
-                    # strip to be safe due to proir input whitespace problems.     
+                    # strip any input to be safe due to proir input whitespace problems.     
                     data += line.strip();
         except:
-        
             print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");
             
         else:
             print("\nFile read successfully.\n");
-            not_read = False;
+            notRead = False;
             file.close();
     
     return data.strip();
@@ -36,11 +35,11 @@ def SaveAffymetrics():
     
     while (notSaved):
     
-        file_name = "affymetrics.txt";
+        fileName = "affymetrics.txt";
         
         try:
         
-            file = open(file_name, "w");
+            file = open(fileName, "w");
             
             #file.write(...);
         
@@ -58,20 +57,20 @@ def SaveAffymetrics():
 
 
 # Part I, 2.
-def Preprocess()
+def Preprocess():
     
     
     return 0;
 
 
 # Part II, 5.
-def Process()
+def Process():
     
     
     return 0;
 
 
-def main()
+def main():
     
     # plh
     
