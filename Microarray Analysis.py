@@ -30,6 +30,33 @@ def readInData(prompt):
 
 
 
+def SaveAffymetrics():
+    
+    notSaved = True;
+    
+    while (notSaved):
+    
+        file_name = "affymetrics.txt";
+        
+        try:
+        
+            file = open(file_name, "w");
+            
+            #file.write(...);
+        
+        except:
+        
+            print("\nError writing to file.\n");
+
+        else:
+            print("\nTable save successful.\n");
+            notSaved = False;
+    
+    file.close();
+    return 0;
+
+
+
 # Part I, 2.
 def Preprocess()
     
