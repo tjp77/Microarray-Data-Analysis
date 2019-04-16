@@ -1,19 +1,47 @@
 #!/user/bin/python
 
 
+class Gene:
+    
+    allList = [];
+    amlList = [];
+    accession = "";
+
+
 def readInData(prompt):
     
-    data = "";
+    # array of gene object, each of gene class, each one line/row of the file data. 
+    genes = [];
     notRead = True
     
     while (notRead):
         
         try:
             
-            fileName = input(prompt);
+            fileName = input(prompt); 
             
             with open(fileName, "r") as file:
-                for line in file:
+                
+                line = file.readline(); 
+                
+                # parse first line, go through find what index turns to AML from ALL. SHould be 58 here for test data file. 
+                
+                line = file.readline(); 
+                
+                # Not sure what this line is yet.
+                
+                line = file.readline(); 
+                
+                # Not sure what this line is yet, either.
+                
+                # Go through remaining lines and get all things interested in.
+                while line:
+                    
+                    # File columns tab delimited.
+                    
+                    # For all where first col, description contains "(endogenous control)", skip since says to eliminate them.
+                    
+                    # second column is Accession ID.
                     
                     # strip any input to be safe due to proir input whitespace problems.     
                     data += line.strip();
@@ -59,6 +87,11 @@ def SaveAffymetrics():
 # Part I, 2.
 def Preprocess():
     
+    # Eliminate the genes with all As across the experiments;
+    
+    # Replace all the expression values below some threshold cut-off value to that threshold value (pick 20 to be the threshold cut-off value);
+
+    # Eliminate the genes with less than two fold change across the experiments (max/min <2);
     
     return 0;
 
