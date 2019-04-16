@@ -131,6 +131,10 @@ def main():
 
 main();
 
+# ======= To Do =======
+
+# - Output read in file and print to test if coming in ok. 
+
 
 # ======= Notes =======
 #
