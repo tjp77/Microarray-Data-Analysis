@@ -6,6 +6,10 @@ class Gene:
     allList = [];
     amlList = [];
     accession = "";
+    
+    def __init__(acc):
+        
+        accession = acc;
 
 
 def readInData(prompt):
@@ -22,29 +26,43 @@ def readInData(prompt):
             
             with open(fileName, "r") as file:
                 
+                # strip any input to be safe due to proir experience with input whitespace problem.
+                firstLine = file.readline().split("\t").strip(); 
+                
+                # Not sure will need these, but have to pass through them either way. 
+                line = file.readline(); 
                 line = file.readline(); 
                 
-                # parse first line, go through find what index turns to AML from ALL. SHould be 58 here for test data file. 
-                
-                line = file.readline(); 
-                
-                # Not sure what this line is yet.
-                
-                line = file.readline(); 
-                
-                # Not sure what this line is yet, either.
                 
                 # Go through remaining lines and get all things interested in.
                 while line:
                     
-                    # File columns tab delimited.
+                    line = file.readline().split("\t").strip(); 
                     
-                    # For all where first col, description contains "(endogenous control)", skip since says to eliminate them.
+                     # For all where first col, description contains "(endogenous control)", skip since supossed to eliminate them.
+                    if ("endogenous control" in line[0]):
+                        continue;
                     
                     # second column is Accession ID.
+                    gene - Gene(line[1]);
                     
-                    # strip any input to be safe due to proir input whitespace problems.     
-                    data += line.strip();
+                    j = 2;
+                    while (j < len(line)):
+                        
+                        if ("ALL" in firstLine[j]):
+                            
+                            # ex: [88, A] for line 7 of input data file
+                            gene.allList.append([line[j], line[j+1]]);
+                            
+                        elif ("AML" in firstLine[j]):
+                            
+                            gene.amlList.append([line[j], line[j+1]]);
+                        
+                        j += 2;
+                    
+                    
+                    genes.append(gene);
+
         except:
             print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");
             
@@ -53,7 +71,7 @@ def readInData(prompt):
             notRead = False;
             file.close();
     
-    return data.strip();
+    return genes;
 
 
 
@@ -105,7 +123,7 @@ def Process():
 
 def main():
     
-    # plh
+    genes = readInData("Enter then name of the file to load:\n");
     
     return 0;
     
