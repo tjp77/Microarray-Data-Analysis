@@ -183,15 +183,41 @@ def Preprocess(genes):
             if (genes[i].amlList[j][0] < 20):
                 genes[i].amlList[j][0] = 20;
         
-        if (aCount == allCount + amlCount):
+        if ( (aCount == allCount + amlCount) || (if (max(firstMax(l_one), firsttMax(l_two)))) ): # best way to find max NUMBER in [ [233, A], [3, P], [82, A] ]  .... Eh, just write own max function to check each of what first elements. 
             del genes[i];
         else:
             ++i;
     
 
     # Eliminate the genes with less than two fold change across the experiments (max/min <2);
+    # if max(e1...e38)/min(e1...e38)<2, eliminate that gene.
+    # There are 38 total if combine AML and ALL values. Join the lists. 
+    
+    
     
     return 0;
+
+
+def firsttMax(list):
+    
+    max = 0;
+    
+    for i in range(0, len(list)):
+        if (list[i][0] < max):
+            max = list[i][0];
+    
+    return max;
+
+
+def firsttMin(list):
+    
+    min = list[0][0];
+    
+    for i in range(1, len(list)):
+        if (list[i][0] < min):
+            min = list[i][0];
+    
+    return min;
 
 
 # Part II, 5.
@@ -211,7 +237,7 @@ def classifygenes(genes):
 
 def main():
     
-    input = readInData("Enter then name of the file to load:\n");
+    input = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....");
     genes = input[0];
     types = input[1];
     print(types);
