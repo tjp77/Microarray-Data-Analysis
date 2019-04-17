@@ -1,5 +1,5 @@
 #!/user/bin/python
-
+import sys;
 
 class Gene:
     
@@ -20,14 +20,17 @@ def readInData(prompt):
     
     while (notRead):
         
-        try:
+        #try:
             
-            fileName = input(prompt); 
+            fileName = "ALL_vs_AML_train_set_38_sorted.txt";
+            print(prompt); 
             
             with open(fileName, "r") as file:
                 
-                # strip any input to be safe due to proir experience with input whitespace problem.
-                firstLine = file.readline().split("\t").strip(); 
+                firstLine = file.readline().split("\t"); 
+                
+                #for i in range(0, len(firstLine)):
+                 #   print (str(i) + firstLine[i] + "|");
                 
                 # Not sure will need these, but have to pass through them either way. 
                 line = file.readline(); 
@@ -37,14 +40,13 @@ def readInData(prompt):
                 # Go through remaining lines and get all things interested in.
                 while line:
                     
-                    line = file.readline().split("\t").strip(); 
-                    
+                    line = file.readline().split("\t")
                      # For all where first col, description contains "(endogenous control)", skip since supossed to eliminate them.
                     if ("endogenous control" in line[0]):
                         continue;
                     
                     # second column is Accession ID.
-                    gene - Gene(line[1]);
+                    gene = Gene(line[1]);
                     
                     j = 2;
                     while (j < len(line)):
@@ -63,19 +65,19 @@ def readInData(prompt):
                     
                     genes.append(gene);
 
-        except:
+        #except:
             print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");
             
-        else:
+        #else:
             print("\nFile read successfully.\n");
             notRead = False;
             file.close();
     
-    return genes;
+    return [genes, firstLine];
 
 
 
-def SaveAffymetrics1():
+def SaveAffymetrics1(genes, types):
     
     notSaved = True;
     
@@ -87,7 +89,31 @@ def SaveAffymetrics1():
         
             file = open(fileName, "w");
             
-            #file.write(...);
+            expCount = len(genes[0].allList);
+            label1 = " \t";
+            label2 = " \t";
+            
+            j = 2;
+            for i in range(1, expCount):
+                
+                label1 += "EXP" + i + "\t";
+                label2 += "(" + types[j]  + ")\t";
+                j += 2;
+            
+            file.write(label1 + "\n");
+            file.write(label2 + "\n");
+            
+            for i in range(0, genes):
+                
+                file.write(genes[i].accession);
+                
+                for k in range(len(genes[i].allList)):
+                    
+                    file.write("\t" + genes[i].allList[k][0]);
+                
+                for k in range(len(genes[i].amlList)):
+                    
+                    file.write("\t" + genes[i].amlList[k][0]);
         
         except:
         
@@ -101,26 +127,26 @@ def SaveAffymetrics1():
     return 0;
     
     
-def SaveAffymetrics2():
+def SaveAffymetrics2(genes, types):
     
     notSaved = True;
     
     while (notSaved):
     
-        fileName = "affymetric2s.txt";
+        fileName = "affymetrics2.txt";
         
         try:
         
             file = open(fileName, "w");
             
-            #file.write(...);
+            file.write(...);
         
         except:
         
             print("\nError writing to file.\n");
 
         else:
-            print("\nTable save successful.\n");
+            print("\nAffymetrics save successful.\n");
             notSaved = False;
     
     file.close();
@@ -169,7 +195,7 @@ def Preprocess(genes):
 
 
 # Part II, 5.
-def Process():
+def Process(genes):
     
     
     return 0;
@@ -177,7 +203,7 @@ def Process():
 
 
 # Par III, KNN
-def classify():
+def classifygenes(genes):
     
     
     return 0;
@@ -185,7 +211,21 @@ def classify():
 
 def main():
     
-    genes = readInData("Enter then name of the file to load:\n");
+    input = readInData("Enter then name of the file to load:\n");
+    genes = input[0];
+    types = input[1];
+    print(types);
+    
+    # Part I
+    Preprocess(genes)
+    SaveAffymetrics1(genes, types);
+    
+    
+    # Part II
+    
+    
+    SaveAffymetrics2(genes, types);
+    
     
     return 0;
     
@@ -196,6 +236,12 @@ main();
 # ======= To Do =======
 
 # - Output read in file and print to test if coming in ok. 
+#   - Types being filled ok. 
+
+# - Test/review SaveAffymetrics1 produced data compared to project example out put shown. 
+
+# --- PreProcess function:
+# Eliminate the genes with less than two fold change across the experiments (max/min <2);
 
 
 # ======= Notes =======
