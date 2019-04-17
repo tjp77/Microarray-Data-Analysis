@@ -5,7 +5,7 @@ class Gene:
     
     allList = [];
     amlList = [];
-    accession = "";
+    accessionId = "";
     
     def __init__(acc):
         
@@ -75,13 +75,39 @@ def readInData(prompt):
 
 
 
-def SaveAffymetrics():
+def SaveAffymetrics1():
     
     notSaved = True;
     
     while (notSaved):
     
-        fileName = "affymetrics.txt";
+        fileName = "affymetrics1.txt";
+        
+        try:
+        
+            file = open(fileName, "w");
+            
+            #file.write(...);
+        
+        except:
+        
+            print("\nError writing to file.\n");
+
+        else:
+            print("\nTable save successful.\n");
+            notSaved = False;
+    
+    file.close();
+    return 0;
+    
+    
+def SaveAffymetrics2():
+    
+    notSaved = True;
+    
+    while (notSaved):
+    
+        fileName = "affymetric2s.txt";
         
         try:
         
@@ -103,11 +129,39 @@ def SaveAffymetrics():
 
 
 # Part I, 2.
-def Preprocess():
+def Preprocess(genes):
     
-    # Eliminate the genes with all As across the experiments;
+    # Eliminate the genes with all As across the experiments, and replace all the expression values below some
+    # threshold cut-off value to that threshold value (pick 20 to be the threshold cut-off value).
+    geneCount = len(genes);
     
-    # Replace all the expression values below some threshold cut-off value to that threshold value (pick 20 to be the threshold cut-off value);
+    while (i < geneCount):
+        
+        aCount = 0;
+        allCount = len(genes[i].allList);
+        amlCount = len(genes[i].amlList);
+        
+        for j in range(0, allCount):
+            
+            if ("A" in genes[i].allList[j][1]):
+                ++aCount;
+            
+            if (genes[i].allList[j][0] < 20):
+                genes[i].allList[j][0] = 20;
+        
+        for j in range(0, amlCount):
+            
+            if ("A" in genes[i].amlList[j][1]):
+                ++aCount;
+                
+            if (genes[i].amlList[j][0] < 20):
+                genes[i].amlList[j][0] = 20;
+        
+        if (aCount == allCount + amlCount):
+            del genes[i];
+        else:
+            ++i;
+    
 
     # Eliminate the genes with less than two fold change across the experiments (max/min <2);
     
@@ -116,6 +170,14 @@ def Preprocess():
 
 # Part II, 5.
 def Process():
+    
+    
+    return 0;
+
+
+
+# Par III, KNN
+def classify():
     
     
     return 0;
