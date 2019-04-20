@@ -11,7 +11,7 @@ class Gene:
         self.amlList = aml;
 
 
-def readInData(prompt):
+def readInData(prompt, fileName):
     
     # array of gene object, each of gene class, each one line/row of the file data. 
     genes = [];
@@ -21,7 +21,6 @@ def readInData(prompt):
         
         try:
             
-            fileName = "ALL_vs_AML_train_set_38_sorted.txt";
             print(prompt); 
             
             with open(fileName, "r") as file:
@@ -82,17 +81,17 @@ def readInData(prompt):
     return [genes, firstLine];
 
 
-# Save Training Data Set
+# Save Training Data
 def SaveAffymetrics1(genes, types):
     
     notSaved = True;
     
     while (notSaved):
     
-            fileName = "affymetrics1.txt";
+        fileName = "affymetrics1.txt";
         
-        #try:
-        
+        try:
+            
             file = open(fileName, "w");
             
             expCount = len(genes[0].allList) + len(genes[0].amlList);
@@ -103,7 +102,7 @@ def SaveAffymetrics1(genes, types):
             j = 2; 
             
             for i in range(1, expCount):
-                #print(j, " - ", i, "\n");
+                
                 label1 += "EXP" + str(i) + "\t";
                 label2 += "(" + types[j]  + ")\t";
                 j += 2;
@@ -125,19 +124,19 @@ def SaveAffymetrics1(genes, types):
                 
                 file.write("\n");
         
-        #except:
+        except:
         
-            print("\nError writing to file.\n");
+            print("\nError writing to affymetrics1.txt file.\n");
 
-       # else:
-            print("\nTable save successful.\n");
+        else:
+            print("\nAffymetrics 1 save successful.\n");
             notSaved = False;
     
     file.close();
     return 0;
     
-    
-# Save Testing Data Set
+   
+   # Save Testing DataS 
 def SaveAffymetrics2(genes, types):
     
     notSaved = True;
@@ -154,7 +153,7 @@ def SaveAffymetrics2(genes, types):
         
         except:
         
-            print("\nError writing to file.\n");
+            print("\nError writing to affymetrics2.txt file.\n");
 
         else:
             print("\nAffymetrics save successful.\n");
@@ -179,7 +178,6 @@ def Preprocess(genes):
     
     while (i < 60): #--------------------------------------------- Set back to geneCount, lowered for faster testing purposes. 
         
-        print(i, "\n");
         aCount = 0;
         
         for j in range(0, allCount):
@@ -205,7 +203,7 @@ def Preprocess(genes):
         # Eliminate genes with either all A tags, and eliminate the genes with less than two
         # fold change across the experiments, where: max(exp1...exp38)/min(exp1...exp38) < 2. 
         if ( (aCount == allCount + amlCount) or (minMax[1]/minMax[0] < 2) ):
-            del genes[i]; print ("deleted ", i);
+            del genes[i]; 
         else:
             i += 1; 
     
@@ -245,22 +243,24 @@ def classifygenes(genes):
 
 def main():
     
-    input = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....");
-    genes = input[0];
-    types = input[1];
+    # Part I
+    inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt");
+    genesTraining = inputTraining[0];
+    typesTraining = inputTraining[1];
     #print(types);
     
-    # Part I
-    Preprocess(genes); 
+    Preprocess(genesTraining); 
     print("\nProcessed.\n");
-    SaveAffymetrics1(genes, types);
+    SaveAffymetrics1(genesTraining, typesTraining);
     print("\nFirst affymetrics Saved..\n");
     
     
     # Part II
+    inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt");
+    genesTesting = inputTesting[0];
+    typesTesting = inputTesting[1];
     
-    
-    #SaveAffymetrics2(genes, types);
+    SaveAffymetrics2(genesTesting, typesTesting);
     
     
     return 0;
@@ -269,27 +269,15 @@ def main():
 
 main();
 
-# ======= To Do ======= 
+# ======= To Do =======
 
-# PreProcess function:
-# Eliminate the genes with less than two fold change across the experiments (max/min <2);
-# - REVIEW SAVED AFFY FILE, SEE IF SEEMS LIKE RIGHT THINGS REMOVED. ('seems' due to file too large to check all)
+# - Output read in file and print to test if coming in ok. 
+#   - Types being filled ok. 
 
-# Save testing data set function
-
-# Sort genes by p-values/T test stuff Part II 4. a
-
-# Part II 5. 
-
-
-# ======= Finished From To Do =======
-
-# - Output read in file and print to test if coming in ok.
 # - Test/review SaveAffymetrics1 produced data compared to project example out put shown. 
-# - - Opened in excel, format matches expected fine. 
-# - - Types being filled ok. 
 
-
+# --- PreProcess function:
+# Eliminate the genes with less than two fold change across the experiments (max/min <2);
 
 
 # ======= Notes =======
