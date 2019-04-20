@@ -7,7 +7,7 @@ class Gene:
     amlList = [];
     accessionId = "";
     
-    def __init__(acc):
+    def __init__(self, acc):
         
         accession = acc;
 
@@ -20,7 +20,7 @@ def readInData(prompt):
     
     while (notRead):
         
-        #try:
+        try:
             
             fileName = "ALL_vs_AML_train_set_38_sorted.txt";
             print(prompt); 
@@ -36,15 +36,20 @@ def readInData(prompt):
                 line = file.readline(); 
                 line = file.readline(); 
                 
+                line = file.readline();
                 
                 # Go through remaining lines and get all things interested in.
                 while line:
                     
-                    line = file.readline().split("\t")
+                    line = line.split("\t")
+                    
                      # For all where first col, description contains "(endogenous control)", skip since supossed to eliminate them.
                     if ("endogenous control" in line[0]):
+                        
+                        line = file.readline();
                         continue;
-                    
+                        
+                    #print(line[1])
                     # second column is Accession ID.
                     gene = Gene(line[1]);
                     
@@ -54,21 +59,22 @@ def readInData(prompt):
                         if ("ALL" in firstLine[j]):
                             
                             # ex: [88, A] for line 7 of input data file
-                            gene.allList.append([line[j], line[j+1]]);
+                            gene.allList.append([(int)(line[j]), line[j+1]]);
                             
                         elif ("AML" in firstLine[j]):
                             
-                            gene.amlList.append([line[j], line[j+1]]);
+                            gene.amlList.append([(int)(line[j]), line[j+1]]);
                         
                         j += 2;
                     
                     
                     genes.append(gene);
+                    line = file.readline();
 
-        #except:
+        except:
             print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");
             
-        #else:
+        else:
             print("\nFile read successfully.\n");
             notRead = False;
             file.close();
@@ -80,12 +86,12 @@ def readInData(prompt):
 def SaveAffymetrics1(genes, types):
     
     notSaved = True;
-    
+    print(len(types));
     while (notSaved):
     
-        fileName = "affymetrics1.txt";
+            fileName = "affymetrics1.txt";
         
-        try:
+        #try:
         
             file = open(fileName, "w");
             
@@ -95,8 +101,8 @@ def SaveAffymetrics1(genes, types):
             
             j = 2;
             for i in range(1, expCount):
-                
-                label1 += "EXP" + i + "\t";
+                print(j, " - ", i, "\n")
+                label1 += "EXP" + str(i) + "\t";
                 label2 += "(" + types[j]  + ")\t";
                 j += 2;
             
@@ -115,11 +121,11 @@ def SaveAffymetrics1(genes, types):
                     
                     file.write("\t" + genes[i].amlList[k][0]);
         
-        except:
+        #except:
         
             print("\nError writing to file.\n");
 
-        else:
+       # else:
             print("\nTable save successful.\n");
             notSaved = False;
     
@@ -139,7 +145,7 @@ def SaveAffymetrics2(genes, types):
         
             file = open(fileName, "w");
             
-            file.write(...);
+            #file.write(...);
         
         except:
         
@@ -157,21 +163,26 @@ def SaveAffymetrics2(genes, types):
 # Part I, 2.
 def Preprocess(genes):
     
-    # Eliminate the genes with all As across the experiments, and replace all the expression values below some
+    # Eliminate the genes with all As across the experiments, and replace all the expression values below some 
     # threshold cut-off value to that threshold value (pick 20 to be the threshold cut-off value).
     geneCount = len(genes);
+    i = 0;
     
-    while (i < geneCount):
+    # All genes have the same amount so just set here. 
+    allCount = len(genes[0].allList);
+    amlCount = len(genes[0].amlList);
+    
+    while (i < 60): #--------------------------------------------- Set back to geneCount, lowered for faster testing purposes. 
         
+        print(i, "\n");
         aCount = 0;
-        allCount = len(genes[i].allList);
-        amlCount = len(genes[i].amlList);
         
         for j in range(0, allCount):
             
             if ("A" in genes[i].allList[j][1]):
                 ++aCount;
             
+            # print(genes[i].allList[j][0]);
             if (genes[i].allList[j][0] < 20):
                 genes[i].allList[j][0] = 20;
         
@@ -179,45 +190,37 @@ def Preprocess(genes):
             
             if ("A" in genes[i].amlList[j][1]):
                 ++aCount;
-                
+            
             if (genes[i].amlList[j][0] < 20):
                 genes[i].amlList[j][0] = 20;
         
-        if ( (aCount == allCount + amlCount) || (if (max(firstMax(l_one), firsttMax(l_two)))) ): # best way to find max NUMBER in [ [233, A], [3, P], [82, A] ]  .... Eh, just write own max function to check each of what first elements. 
-            del genes[i];
+        # [min, max]
+        minMax = GetMinMax(genes[i].allList + genes[i].amlList);
+        
+        # Eliminate genes with either all A tags, and eliminate the genes with less than two
+        # fold change across the experiments, where: max(exp1...exp38)/min(exp1...exp38) < 2. 
+        if ( (aCount == allCount + amlCount) or (minMax[1]/minMax[0] < 2) ):
+            del genes[i]; print ("deleted ", i);
         else:
-            ++i;
-    
-
-    # Eliminate the genes with less than two fold change across the experiments (max/min <2);
-    # if max(e1...e38)/min(e1...e38)<2, eliminate that gene.
-    # There are 38 total if combine AML and ALL values. Join the lists. 
-    
-    
+            i += 1; 
     
     return 0;
 
 
-def firsttMax(list):
+def GetMinMax(list): 
     
     max = 0;
-    
-    for i in range(0, len(list)):
-        if (list[i][0] < max):
-            max = list[i][0];
-    
-    return max;
-
-
-def firsttMin(list):
-    
     min = list[0][0];
     
-    for i in range(1, len(list)):
+    for i in range(0, len(list)):
+        if (list[i][0] > max ):
+            max = list[i][0];
+
         if (list[i][0] < min):
             min = list[i][0];
     
-    return min;
+    return [min, max];
+
 
 
 # Part II, 5.
@@ -243,14 +246,16 @@ def main():
     print(types);
     
     # Part I
-    Preprocess(genes)
+    Preprocess(genes); 
+    print("\nProcessed.\n");
     SaveAffymetrics1(genes, types);
+    print("\nFirst affymetrics Saved..\n");
     
     
     # Part II
     
     
-    SaveAffymetrics2(genes, types);
+    #SaveAffymetrics2(genes, types);
     
     
     return 0;
