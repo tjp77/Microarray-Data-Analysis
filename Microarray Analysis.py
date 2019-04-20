@@ -2,14 +2,13 @@
 import sys;
 
 class Gene:
+
     
-    allList = [];
-    amlList = [];
-    accessionId = "";
-    
-    def __init__(self, acc):
+    def __init__(self, acc, all, aml):
         
-        accession = acc;
+        self.accessionId = acc;
+        self.allList = all;
+        self.amlList = aml;
 
 
 def readInData(prompt):
@@ -49,9 +48,10 @@ def readInData(prompt):
                         line = file.readline();
                         continue;
                         
-                    #print(line[1])
                     # second column is Accession ID.
-                    gene = Gene(line[1]);
+                    accession = line[1];
+                    all = [];
+                    aml = [];
                     
                     j = 2;
                     while (j < len(line)):
@@ -59,20 +59,20 @@ def readInData(prompt):
                         if ("ALL" in firstLine[j]):
                             
                             # ex: [88, A] for line 7 of input data file
-                            gene.allList.append([(int)(line[j]), line[j+1]]);
+                            all.append([(int)(line[j]), line[j+1]]);
                             
                         elif ("AML" in firstLine[j]):
                             
-                            gene.amlList.append([(int)(line[j]), line[j+1]]);
+                            aml.append([(int)(line[j]), line[j+1]]);
                         
                         j += 2;
                     
-                    
-                    genes.append(gene);
-                    line = file.readline();
+                    genes.append(Gene(accession, all, aml)); #print(genes[-1].allList, "\n\n");
+                    line = file.readline(); 
 
         except:
             print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");
+            sys.exit();
             
         else:
             print("\nFile read successfully.\n");
@@ -86,7 +86,7 @@ def readInData(prompt):
 def SaveAffymetrics1(genes, types):
     
     notSaved = True;
-    print(len(types));
+    
     while (notSaved):
     
             fileName = "affymetrics1.txt";
@@ -95,13 +95,15 @@ def SaveAffymetrics1(genes, types):
         
             file = open(fileName, "w");
             
-            expCount = len(genes[0].allList);
+            expCount = len(genes[0].allList) + len(genes[0].amlList);
             label1 = " \t";
             label2 = " \t";
+            #print(genes[0].allList);
             
-            j = 2;
+            j = 2; 
+            
             for i in range(1, expCount):
-                print(j, " - ", i, "\n")
+                #print(j, " - ", i, "\n");
                 label1 += "EXP" + str(i) + "\t";
                 label2 += "(" + types[j]  + ")\t";
                 j += 2;
@@ -109,17 +111,19 @@ def SaveAffymetrics1(genes, types):
             file.write(label1 + "\n");
             file.write(label2 + "\n");
             
-            for i in range(0, genes):
+            for i in range(0, len(genes)):
                 
-                file.write(genes[i].accession);
+                file.write(genes[i].accessionId);
                 
                 for k in range(len(genes[i].allList)):
                     
-                    file.write("\t" + genes[i].allList[k][0]);
+                    file.write("\t" + str(genes[i].allList[k][0]));
                 
                 for k in range(len(genes[i].amlList)):
                     
-                    file.write("\t" + genes[i].amlList[k][0]);
+                    file.write("\t" + str(genes[i].amlList[k][0]));
+                
+                file.write("\n");
         
         #except:
         
@@ -243,7 +247,7 @@ def main():
     input = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....");
     genes = input[0];
     types = input[1];
-    print(types);
+    #print(types);
     
     # Part I
     Preprocess(genes); 
@@ -264,15 +268,21 @@ def main():
 
 main();
 
-# ======= To Do =======
+# ======= To Do ======= 
 
-# - Output read in file and print to test if coming in ok. 
-#   - Types being filled ok. 
-
-# - Test/review SaveAffymetrics1 produced data compared to project example out put shown. 
-
-# --- PreProcess function:
+# PreProcess function:
 # Eliminate the genes with less than two fold change across the experiments (max/min <2);
+# - REVIEW SAVED AFFY FILE, SEE IF SEEMS LIKE RIGHT THINGS REMOVED. ('seems' due to file too large to check all)
+
+
+# ======= Finished From To Do =======
+
+# - Output read in file and print to test if coming in ok.
+# - Test/review SaveAffymetrics1 produced data compared to project example out put shown. 
+# - - Opened in excel, format matches expected fine. 
+# - - Types being filled ok. 
+
+
 
 
 # ======= Notes =======
