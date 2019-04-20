@@ -11,7 +11,7 @@ class Gene:
         self.amlList = aml;
 
 
-def readInData(prompt, fileName):
+def readInData(prompt, fileName, threshold):
     
     # array of gene object, each of gene class, each one line/row of the file data. 
     genes = [];
@@ -30,10 +30,11 @@ def readInData(prompt, fileName):
                 #for i in range(0, len(firstLine)):
                  #   print (str(i) + firstLine[i] + "|");
                 
-                # Not sure will need these, but have to pass through them either way. 
+                # Not sure will need these, but have to pass through them either way.  
                 line = file.readline(); 
                 line = file.readline(); 
                 
+                # For first pass of while loop. 
                 line = file.readline();
                 
                 # Go through remaining lines and get all things interested in.
@@ -53,7 +54,10 @@ def readInData(prompt, fileName):
                     aml = [];
                     
                     j = 2;
-                    while (j < len(line)):
+                    while (j < len(line) - 1):
+                        
+                        if ( (int)(line[j]) < threshold ):
+                            line[j] = threshold; 
                         
                         if ("ALL" in firstLine[j]):
                             
@@ -68,7 +72,6 @@ def readInData(prompt, fileName):
                     
                     genes.append(Gene(accession, all, aml)); #print(genes[-1].allList, "\n\n");
                     line = file.readline(); 
-
         except:
             print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");
             sys.exit();
@@ -101,9 +104,9 @@ def SaveAffymetrics1(genes, types):
             
             j = 2; 
             
-            for i in range(1, expCount):
+            for i in range(0, expCount):
                 
-                label1 += "EXP" + str(i) + "\t";
+                label1 += "EXP" + str(i + 1) + "\t";
                 label2 += "(" + types[j]  + ")\t";
                 j += 2;
             
@@ -185,17 +188,11 @@ def Preprocess(genes):
             if ("A" in genes[i].allList[j][1]):
                 ++aCount;
             
-            # print(genes[i].allList[j][0]);
-            if (genes[i].allList[j][0] < 20):
-                genes[i].allList[j][0] = 20;
         
         for j in range(0, amlCount):
             
             if ("A" in genes[i].amlList[j][1]):
                 ++aCount;
-            
-            if (genes[i].amlList[j][0] < 20):
-                genes[i].amlList[j][0] = 20;
         
         # [min, max]
         minMax = GetMinMax(genes[i].allList + genes[i].amlList);
@@ -226,12 +223,11 @@ def GetMinMax(list):
 
 
 
-# Part II, 5.
-def Process(genes):
+# Part II, 4.
+def ProcessTraining(genes):
     
     
     return 0;
-
 
 
 # Par III, KNN
@@ -244,7 +240,7 @@ def classifygenes(genes):
 def main():
     
     # Part I
-    inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt");
+    inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
     genesTraining = inputTraining[0];
     typesTraining = inputTraining[1];
     #print(types);
@@ -256,7 +252,7 @@ def main():
     
     
     # Part II
-    inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt");
+    inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt", 20);
     genesTesting = inputTesting[0];
     typesTesting = inputTesting[1];
     
@@ -269,15 +265,26 @@ def main():
 
 main();
 
-# ======= To Do =======
+# ======= To Do ======= 
 
-# - Output read in file and print to test if coming in ok. 
-#   - Types being filled ok. 
-
-# - Test/review SaveAffymetrics1 produced data compared to project example out put shown. 
-
-# --- PreProcess function:
+# PreProcess function:
 # Eliminate the genes with less than two fold change across the experiments (max/min <2);
+# - REVIEW SAVED AFFY FILE, SEE IF SEEMS LIKE RIGHT THINGS REMOVED. ('seems' due to file too large to check all)
+
+# Save testing data set function - In Progress 
+
+# Sort genes by p-values/T test stuff Part II 4. a
+
+
+
+# ======= Finished From To Do =======
+
+# - Output read in file and print to test if coming in ok.
+# - Test/review SaveAffymetrics1 produced data compared to project example out put shown. 
+# - - Opened in excel, format matches expected fine. 
+# - - Types being filled ok. 
+
+
 
 
 # ======= Notes =======
