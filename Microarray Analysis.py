@@ -82,7 +82,7 @@ def readInData(prompt):
     return [genes, firstLine];
 
 
-
+# Save Training Data Set
 def SaveAffymetrics1(genes, types):
     
     notSaved = True;
@@ -137,6 +137,7 @@ def SaveAffymetrics1(genes, types):
     return 0;
     
     
+# Save Testing Data Set
 def SaveAffymetrics2(genes, types):
     
     notSaved = True;
@@ -273,6 +274,12 @@ main();
 # PreProcess function:
 # Eliminate the genes with less than two fold change across the experiments (max/min <2);
 # - REVIEW SAVED AFFY FILE, SEE IF SEEMS LIKE RIGHT THINGS REMOVED. ('seems' due to file too large to check all)
+
+# Save testing data set function
+
+# Sort genes by p-values/T test stuff Part II 4. a
+
+# Part II 5. 
 
 
 # ======= Finished From To Do =======
