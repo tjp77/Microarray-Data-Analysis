@@ -2,7 +2,6 @@
 import sys;
 
 class Gene:
-
     
     def __init__(self, acc, all, aml):
         
@@ -84,85 +83,126 @@ def readInData(prompt, fileName, threshold):
     return [genes, firstLine];
 
 
-# Save Training Data
+# Save Training Data, Part I
 def SaveAffymetrics1(genes, types):
     
-    notSaved = True;
-    
-    while (notSaved):
-    
-        fileName = "affymetrics1.txt";
+    fileName = "affymetrics1.txt";
         
-        try:
+    try:
             
-            file = open(fileName, "w");
+        file = open(fileName, "w");
             
-            expCount = len(genes[0].allList) + len(genes[0].amlList);
-            label1 = " \t";
-            label2 = " \t";
-            #print(genes[0].allList);
+        expCount = len(genes[0].allList) + len(genes[0].amlList);
+        label1 = " \t";
+        label2 = " \t";
+        #print(genes[0].allList); 
             
-            j = 2; 
+        j = 2; 
             
-            for i in range(0, expCount):
-                
-                label1 += "EXP" + str(i + 1) + "\t";
-                label2 += "(" + types[j]  + ")\t";
-                j += 2;
+        for i in range(0, expCount):
             
-            file.write(label1 + "\n");
-            file.write(label2 + "\n");
+            label1 += "EXP" + str(i + 1) + "\t";
+            label2 += "(" + types[j]  + ")\t";
+            j += 2;
             
-            for i in range(0, len(genes)):
-                
-                file.write(genes[i].accessionId);
-                
-                for k in range(len(genes[i].allList)):
-                    
-                    file.write("\t" + str(genes[i].allList[k][0]));
-                
-                for k in range(len(genes[i].amlList)):
-                    
-                    file.write("\t" + str(genes[i].amlList[k][0]));
-                
-                file.write("\n");
+        file.write(label1 + "\n");
+        file.write(label2 + "\n");
+            
+        WriteGenes(genes, file);
         
-        except:
+    except:
         
-            print("\nError writing to affymetrics1.txt file.\n");
+        print("\nError writing to ", fileName, "file.\n");
 
-        else:
-            print("\nAffymetrics 1 save successful.\n");
-            notSaved = False;
+    else:
+        print("\nFirst affymetrics save successful.\n");
     
     file.close();
     return 0;
-    
-   
-   # Save Testing DataS 
-def SaveAffymetrics2(genes, types):
-    
-    notSaved = True;
-    
-    while (notSaved):
-    
-        fileName = "affymetrics2.txt";
-        
-        try:
-        
-            file = open(fileName, "w");
-            
-            #file.write(...);
-        
-        except:
-        
-            print("\nError writing to affymetrics2.txt file.\n");
 
-        else:
-            print("\nAffymetrics save successful.\n");
-            notSaved = False;
+
+# Save Testing Data, Part II 4.b
+def SaveAffymetrics3(genes, types):
+    
+    fileName = "affymetrics2.txt";
+        
+    try:
+        
+        file = open(fileName, "w");
+        
+        # ----==== Change label second here to however needed. ====----
+            
+        #expCount = len(genes[0].allList) + len(genes[0].amlList);
+        #label = " \t";
+            
+        #for i in range(0, expCount):
+                
+            #label += "Test_Exp" + str(i + 1) + "\t";
+            
+        #file.write(label + "\n");
+            
+        WriteGenes(genes, file);
+        
+    except:
+        
+        print("\nError writing to ", fileName, "file.\n");
+
+    else:
+        print("\nSecond affymetrics save successful.\n");
     
     file.close();
+    
+    return 0; 
+
+   
+# Save Testing Data, Part II 5 
+def SaveAffymetrics3(genes, types):
+    
+    fileName = "affymetrics3.txt";
+        
+    try:
+        
+        file = open(fileName, "w");
+            
+        expCount = len(genes[0].allList) + len(genes[0].amlList);
+        label = " \t";
+            
+        for i in range(0, expCount):
+                
+            label += "Test_Exp" + str(i + 1) + "\t";
+            
+        file.write(label + "\n");
+            
+        WriteGenes(genes, file);
+        
+    except:
+        
+        print("\nError writing to ", fileName, "file.\n");
+
+    else:
+        print("\nThird affymetrics save successful.\n");
+            
+    file.close();
+    return 0;
+
+
+
+def WriteGenes(genes, file):
+    
+    for i in range(0, len(genes)):
+                
+        file.write(genes[i].accessionId);
+                
+        for k in range(len(genes[i].allList)):
+                    
+            file.write("\t" + str(genes[i].allList[k][0]));
+                
+        for k in range(len(genes[i].amlList)):
+                    
+            file.write("\t" + str(genes[i].amlList[k][0]));
+                
+        file.write("\n");
+    
     return 0;
 
 
@@ -248,7 +288,6 @@ def main():
     Preprocess(genesTraining); 
     print("\nProcessed.\n");
     SaveAffymetrics1(genesTraining, typesTraining);
-    print("\nFirst affymetrics Saved..\n");
     
     
     # Part II
@@ -256,7 +295,7 @@ def main():
     genesTesting = inputTesting[0];
     typesTesting = inputTesting[1];
     
-    SaveAffymetrics2(genesTesting, typesTesting);
+    SaveAffymetrics3(genesTesting, typesTesting);
     
     
     return 0;
@@ -271,7 +310,7 @@ main();
 # Eliminate the genes with less than two fold change across the experiments (max/min <2);
 # - REVIEW SAVED AFFY FILE, SEE IF SEEMS LIKE RIGHT THINGS REMOVED. ('seems' due to file too large to check all)
 
-# Save testing data set function - In Progress 
+
 
 # Sort genes by p-values/T test stuff Part II 4. a
 
