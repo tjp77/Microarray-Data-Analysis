@@ -1,8 +1,12 @@
 #!/user/bin/python
 import sys;
+import xlsxwriter
 import numpy as np
 from sklearn import datasets
 from sklearn.neighbors import KNeighborsClassifier
+
+workbook = xlsxwriter.Workbook('microarray-analysis.xlsx')
+affy1_worksheet = workbook.add_worksheet('affymetrics1')
 
 class Gene:
     
@@ -75,7 +79,7 @@ def readInData(prompt, fileName, threshold):
                     genes.append(Gene(accession, all, aml)); #print(genes[-1].allList, "\n\n");
                     line = file.readline(); 
         except:
-            print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");
+            print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");p
             sys.exit();
             
         else:
@@ -88,40 +92,67 @@ def readInData(prompt, fileName, threshold):
 
 # Save Training Data, Part I
 def SaveAffymetrics1(genes, types):
-    
-    fileName = "affymetrics1.txt";
-        
-    try:
-            
-        file = open(fileName, "w");
-            
-        expCount = len(genes[0].allList) + len(genes[0].amlList);
-        label1 = " \t";
-        label2 = " \t";
-        #print(genes[0].allList); 
-            
-        j = 2; 
-            
-        for i in range(0, expCount):
-            
-            label1 += "EXP" + str(i + 1) + "\t";
-            label2 += "(" + types[j]  + ")\t";
-            j += 2;
-            
-        file.write(label1 + "\n");
-        file.write(label2 + "\n");
-            
-        WriteGenes(genes, file);
-        
-    except:
-        
-        print("\nError writing to ", fileName, "file.\n");
+    expCount = len(genes[0].allList) + len(genes[0].amlList);
+    label1 = ""
+    label2 = "";
 
-    else:
-        print("\nFirst affymetrics save successful.\n");
+    j = 2
+
+    row = 0
+    col = 1
+
+    for i in range(expCount):
+        label1 = "EXP" + str(i + 1)
+        label2 = "(" + types[j]  + ")"
+        j += 2;
+
+        affy1_worksheet.write(row, col, label1)
+        affy1_worksheet.write(row+1, col, label2)
+
+        col += 1
+
+    WriteGenes(genes, affy1_worksheet)
     
-    file.close();
-    return 0;
+    # fileName = "affymetrics1.txt";
+        
+    # try:
+            
+    #     file = open(fileName, "w");
+            
+    #     expCount = len(genes[0].allList) + len(genes[0].amlList);
+    #     label1 = ""
+    #     label2 = "";
+    #     #print(genes[0].allList); 
+            
+    #     j = 2; 
+
+    #     row = 0
+    #     col = 1
+            
+    #     for i in range(0, expCount):
+            
+    #         label1 = "EXP" + str(i + 1)
+    #         label2 = "(" + types[j]  + ")"
+    #         j += 2;
+    #         affy1_worksheet.write(row, col, label1)
+    #         affy1_worksheet.write(row+1, col, label2)
+    #         col += 1
+            
+    #     file.write(label1 + "\n");
+    #     file.write(label2 + "\n");
+
+            
+    #     WriteGenes(genes, file);
+        
+    # except:
+        
+    #     print("\nError writing to ", fileName, "file.\n");
+
+    # else:
+    #     print("\nFirst affymetrics save successful.\n");
+    
+    # file.close();
+    # return 0;
 
 
 # Save Testing Data, Part II 4.b
@@ -190,21 +221,24 @@ def SaveAffymetrics3(genes, types):
 
 
 
-def WriteGenes(genes, file):
-    
+def WriteGenes(genes, worksheet):
+
+    row = 2
+    col = 0
     for i in range(0, len(genes)):
-                
-        file.write(genes[i].accessionId);
+        col = 0
+        worksheet.write(row, col, genes[i].accessionId)
+        col += 1
                 
         for k in range(len(genes[i].allList)):
-                    
-            file.write("\t" + str(genes[i].allList[k][0]));
-                
+            worksheet.write(row, col, str(genes[i].allList[k][0]))
+            col += 1
+
         for k in range(len(genes[i].amlList)):
-                    
-            file.write("\t" + str(genes[i].amlList[k][0]));
+            worksheet.write(row, col, str(genes[i].amlList[k][0]))
+            col += 1
                 
-        file.write("\n");
+        row += 1
     
     return 0;
 
@@ -221,8 +255,9 @@ def Preprocess(genes):
     # All genes have the same amount so just set here. 
     allCount = len(genes[0].allList);
     amlCount = len(genes[0].amlList);
-    
-    while (i < 60): #--------------------------------------------- Set back to geneCount, lowered for faster testing purposes. 
+
+    # FIXME: Set upper limit to size of dataset
+    while (i < 5): #--------------------------------------------- Set back to geneCount, lowered for faster testing purposes. 
         
         aCount = 0;
         
@@ -325,6 +360,8 @@ def main():
 
 
 main();
+
+workbook.close()
 
 # ======= To Do ======= 
 
