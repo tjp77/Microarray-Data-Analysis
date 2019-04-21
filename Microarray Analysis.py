@@ -1,5 +1,8 @@
 #!/user/bin/python
 import sys;
+import numpy as np
+from sklearn import datasets
+from sklearn.neighbors import KNeighborsClassifier
 
 class Gene:
     
@@ -273,6 +276,25 @@ def ProcessTraining(genes):
 # Par III, KNN
 def classifygenes(genes):
     
+    knnSize = 0.6 * len(genes);
+    
+    knn = KNeighborsClassifier(algorithm = 'auto', leaf_size = 30, # what was leaf size? 
+                               metric = 'minkowski', metric_params = None, n_jobs = 1,
+                               n_neighbors = 3, p = 2, weights = 'uniform');
+    
+    trainData = "";
+    trainTargetLabels = "";
+    
+    testData = "";
+    testTargetLabels = "";
+    
+    knn.fit(trainData, trainTargetLabels);
+    
+    print("Classifier predictions for testing data:");
+    print(knn.predict(testData));
+    
+    print("Target labels for testing data:");
+    print(testTargetLabels);
     
     return 0;
 
@@ -313,6 +335,12 @@ main();
 
 
 # Sort genes by p-values/T test stuff Part II 4. a
+
+
+# Complete KNN stuff.
+
+
+# Once everything else is done, try dif amounts of n_neighbors for the KNN classifier and compare results. 
 
 
 
