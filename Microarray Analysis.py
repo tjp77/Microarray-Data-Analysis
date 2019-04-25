@@ -306,9 +306,9 @@ def WriteClassifyResultsToFile(testingPrediction, labelsTesting):
         
         file = open(fileName, "w");
             
-        for i in range(0, len(testingPrediction)):
+        for i in range(0, len(labelsTesting)):
                 
-            file.write(testingPrediction + "\t");
+            file.write(labelsTesting + "\t");
         
         file.write("\n");
         
