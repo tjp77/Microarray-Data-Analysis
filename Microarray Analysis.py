@@ -326,6 +326,19 @@ def WriteClassifyResultsToFile(testingPrediction, labelsTesting):
     return 0;
 
 
+def SelectTestingGenes(genesTraining, genesTesting): 
+    
+    selectedGenes = [];
+    
+    # For each of the top 50 selected genes in the training data, get the matching ones
+    # from the testing data for future classification. 
+    for i in range(0, len(genesTraining)):
+        
+        selectedGenes.append(genesTesting[genesTraining[i].ID]);
+    
+    return selectedGenes;
+
+
 def main():
     
     inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
@@ -337,12 +350,17 @@ def main():
     print("\nProcessed.\n");
     SaveAffymetrics1(genesTraining, typesTraining);
     
+    # TODO - T test and excel stuff selection of top 50 genes based on p-value
+    
     inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt", 20);
     genesTesting = inputTesting[0];
     typesTesting = inputTesting[1];
     
-    SaveAffymetrics3(genesTesting, typesTesting);
+    # TODO Makes sure only top 50 selected training genes are sent to this function. 
+    # Take from the testing data, the matching genes to the selected top 50 training data genes. 
+    genesTesting = SelectTestingGenes(genesTraining, genesTesting);
     
+    SaveAffymetrics3(genesTraining, typesTesting);
     
     ClassifyGenes(genesTraining, typesTraining, genesTesting, typesTesting)
     
