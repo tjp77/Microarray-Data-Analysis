@@ -6,11 +6,12 @@ from sklearn.neighbors import KNeighborsClassifier
 
 class Gene:
     
-    def __init__(self, acc, all, aml):
+    def __init__(self, acc, all, aml, rowID):
         
         self.accessionId = acc;
         self.allList = all;
         self.amlList = aml;
+        self.ID = rowID;
 
 
 def readInData(prompt, fileName, threshold):
@@ -38,6 +39,8 @@ def readInData(prompt, fileName, threshold):
                 
                 # For first pass of while loop. 
                 line = file.readline();
+                # Keep track of which file line gene is on, so can easily pull testing genes corresponding to selected top 50 training genes. 
+                id = 0;
                 
                 # Go through remaining lines and get all things interested in.
                 while line:
@@ -56,6 +59,7 @@ def readInData(prompt, fileName, threshold):
                     aml = [];
                     
                     j = 2;
+                    # Get each expresson value.
                     while (j < len(line) - 1):
                         
                         if ( (int)(line[j]) < threshold ):
@@ -72,7 +76,8 @@ def readInData(prompt, fileName, threshold):
                         
                         j += 2;
                     
-                    genes.append(Gene(accession, all, aml)); #print(genes[-1].allList, "\n\n");
+                    genes.append(Gene(accession, all, aml, id)); #print(genes[-1].allList, "\n\n");
+                    id += 1;
                     line = file.readline(); 
         except:
             print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");
@@ -84,7 +89,6 @@ def readInData(prompt, fileName, threshold):
             file.close();
     
     return [genes, firstLine];
-
 
 # Save Training Data, Part I
 def SaveAffymetrics1(genes, types):
