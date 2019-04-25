@@ -125,7 +125,7 @@ def SaveAffymetrics1(genes, types):
 
 
 # Save Testing Data, Part II 4.b
-def SaveAffymetrics3(genes, types):
+def SaveAffymetrics2(genes, types):
     
     fileName = "affymetrics2.txt";
         
