@@ -358,11 +358,11 @@ def main():
     
     # TODO Makes sure only top 50 selected training genes are sent to this function. 
     # Take from the testing data, the matching genes to the selected top 50 training data genes. 
-    genesTesting = SelectTestingGenes(genesTraining, genesTesting);
+    # genesTesting = SelectTestingGenes(genesTraining, genesTesting);
     
     SaveAffymetrics3(genesTraining, typesTesting);
     
-    ClassifyGenes(genesTraining, typesTraining, genesTesting, typesTesting)
+    # ClassifyGenes(genesTraining, typesTraining, genesTesting, typesTesting)
     
     return 0;
     
