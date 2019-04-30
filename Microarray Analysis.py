@@ -233,7 +233,7 @@ def Preprocess(genes):
     allCount = len(genes[0].allList);
     amlCount = len(genes[0].amlList);
     
-    while (i < 60): # TODO --------------------------------------------- Set back to geneCount, lowered for faster testing purposes. 
+    while (i < len(genes)):  
         
         aCount = 0;
         
