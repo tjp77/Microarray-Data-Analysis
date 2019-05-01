@@ -296,11 +296,16 @@ def Reformat(genes):
     new = [];
     
     i = 0; j = 0; k = 1;
+    
     while (i<len(genes[0])):
+        
         new.append([genes[0][i]]);
+        
         while (k<len(genes)):
+            
             new[i].append(genes[k][i]);
             k+=1;
+            
         i+=1; k = 1;
     
     #print (new);
@@ -389,6 +394,22 @@ def SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting)
     return [np.array(selectedTraining), kNNLabelsTraining, np.array(selectedTesting), kNNLabelsTesting];
 
 
+
+def DisplaAccuracy(results, targetResults, length):
+    
+    correctCount = 0;
+    i = 0;
+    while (i < length):
+        
+        if (results[i] == targetResults[i]):
+            ++correctCount;
+        ++i;
+    
+    print ("Predicted Results Accuracy: ", correctCount/length, "%")
+    
+    return 0;
+
+
 def main():
 
     if args.program_part == "pre":
@@ -413,7 +434,7 @@ def main():
         top_50_input = readInData("Reading the top 50 genes...", "Affymetrics_top50.txt")
         top_50_genes = top_50_input[0]
         top_50_types = top_50_input[1]
-    
+        
         inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt", 20);
         genesTesting = inputTesting[0];
         typesTesting = inputTesting[1];
@@ -436,7 +457,6 @@ main();
 
 # Load back in the top50 genes file so can be used in the next part of the program.
 
-# determine if doing the reformat function with the full large dataset is too expensive, and if things to need to be reworked to load it like that from the start. 
 
 # Try dif amounts of n_neighbors for the KNN classifier on full dataset and compare results. 
 
