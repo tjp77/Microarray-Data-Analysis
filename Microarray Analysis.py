@@ -1,13 +1,8 @@
 #!/user/bin/python
 import sys;
 import numpy as np
-import argparse
 from sklearn import datasets
 from sklearn.neighbors import KNeighborsClassifier
-
-parser = argparse.ArgumentParser(description="Run code for the Microarray project.")
-parser.add_argument("program_part", metavar="pre | post", type=str, help="To run pre-Excel functions use pre, to run post-excel functions use post")
-args = parser.parse_args()
 
 class Gene:
     
@@ -21,7 +16,7 @@ class Gene:
         self.ID = rowID;
 
 
-def readInData(prompt, fileName, threshold=20):
+def readInData(prompt, fileName, threshold):
     
     # array of gene object, each of gene class, each one line/row of the file data. 
     genes = [];
@@ -246,10 +241,10 @@ def Preprocess(genes):
             
             if ("A" in genes[i].allCategoryList[j]):
                 ++aCount;
+        
+        for k in range(0, amlCount):
             
-        for j in range(0, amlCount):
-            
-            if ("A" in genes[i].amlCategoryList[j]):
+            if ("A" in genes[i].amlCategoryList[k]):
                 ++aCount;
         
         # [min, max]
@@ -310,14 +305,10 @@ def Reformat(genes):
 # https://scikit-learn.org/stable/modules/generated/sklearn.svm.libsvm.fit.html#sklearn.svm.libsvm.fit
 def ClassifyGenes(genesTraining, labelsTraining, genesTesting, labelsTesting):
     
-    Rotate(genesTraining);
-    Rotate(genesTesting);
-    
     knn = KNeighborsClassifier(algorithm = 'auto', leaf_size = 30,  
                                metric = 'minkowski', metric_params = None, n_jobs = 1,
                                n_neighbors = 3, p = 2, weights = 'uniform');
-              #.reshape(-1, 1)                 
-    #print(genesTraining, "\n - \n")
+    
     knn.fit(genesTraining, labelsTraining);  
     
     prediction = knn.predict(genesTesting); 
@@ -347,7 +338,7 @@ def WriteClassifyResultsToFile(testingPrediction, labelsTesting):
         
         file.write("\n");
         
-        for i in range(0, len(testingPrediction)):
+        for j in range(0, len(testingPrediction)):
                 
             file.write(testingPrediction + "\t");
     except:
@@ -371,8 +362,6 @@ def SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting)
     typeToKNNLabel = { "ALL" : 0, "AML" : 1};
     labelsTraining = typesTraining[2:-1:2];
     labelsTesting = typesTesting[2:-1:2];
-    #kNNLabelTraining = [];
-    #kNNLabelTesting = [];
     kNNLabelsTraining = [];
     kNNLabelsTesting = [];
     
@@ -391,64 +380,54 @@ def SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting)
         
         kNNLabelsTesting.append(typeToKNNLabel[labelsTesting[i][:3]]);
        
-    #kNNLabelsTraining.extend([kNNLabelTraining] * len(genesTraining));
-    #kNNLabelsTesting.extend([kNNLabelTesting] * len(genesTraining));
-    
-    #print(kNNLabelsTraining, "\n")
-    #print(kNNLabelsTesting)
     return [np.array(selectedTraining), kNNLabelsTraining, np.array(selectedTesting), kNNLabelsTesting];
 
 
 def main():
+    
+    inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
+    genesTraining = inputTraining[0];
+    typesTraining = inputTraining[1];
+    #print(types);
+    
+    Preprocess(genesTraining); 
+    print("\nProcessed.\n");
+    SaveAffymetrics1(genesTraining, typesTraining);
+    
+    # TODO - T test and excel stuff selection of top 50 genes based on p-value
+    
+    inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt", 20);
+    genesTesting = inputTesting[0];
+    typesTesting = inputTesting[1];
+    #Rotate(genesTraining); 
+    # TODO Makes sure only top 50 selected training genes are sent to this function. 
+    # Take from the testing data, the matching genes to the selected top 50 training data genes. 
+    genesKNNArrs = SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting);
+    
+    SaveAffymetrics3(genesTraining, typesTesting);
+    
+    ClassifyGenes(Reformat(genesKNNArrs[0]), genesKNNArrs[1], Reformat(genesKNNArrs[2]), genesKNNArrs[3]);
+    
+    return 0;
+    
 
-    if args.program_part == "pre":
-        inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
-        genesTraining = inputTraining[0];
-        typesTraining = inputTraining[1];
-        #print(types);
-    
-        Preprocess(genesTraining); 
-        print("\nProcessed.\n");
-        SaveAffymetrics1(genesTraining, typesTraining);
-    
-    elif args.program_part == "post":
-        inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
-        genesTraining = inputTraining[0];
-        typesTraining = inputTraining[1];
-        #print(types);
-    
-        Preprocess(genesTraining); 
 
-        # TODO - T test and excel stuff selection of top 50 genes based on p-value
-        top_50_input = readInData("Reading the top 50 genes...", "Affymetrics_top50.txt")
-        top_50_genes = top_50_input[0]
-        top_50_types = top_50_input[1]
-    
-        inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt", 20);
-        genesTesting = inputTesting[0];
-        typesTesting = inputTesting[1];
-        #Rotate(genesTraining); 
-        # TODO Makes sure only top 50 selected training genes are sent to this function. 
-        # Take from the testing data, the matching genes to the selected top 50 training data genes. 
-        genesKNNArrs = SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting);
-    
-        SaveAffymetrics3(genesTraining, typesTesting);
-    
-        ClassifyGenes(Reformat(genesKNNArrs[0]), genesKNNArrs[1], Reformat(genesKNNArrs[2]), genesKNNArrs[3]);
-
-    else:
-        parser.print_help()
-        
 main();
 
 
 # ======= To Do ======= 
 
-# Load back in the top50 genes file so can be used in the next part of the program.
+# PreProcess function:
+# Eliminate the genes with less than two fold change across the experiments (max/min <2);
+# - REVIEW SAVED AFFY FILE, SEE IF SEEMS LIKE RIGHT THINGS REMOVED. ('seems' due to file too large to check all)
 
-# determine if doing the reformat function with the full large dataset is too expensive, and if things to need to be reworked to load it like that from the start. 
 
-# Try dif amounts of n_neighbors for the KNN classifier on full dataset and compare results. 
+# Sort genes by p-values/T test stuff Part II 4. a
+
+# Complete KNN stuff.
+
+
+# Once everything else is done, try dif amounts of n_neighbors for the KNN classifier and compare results. 
 
 
 
