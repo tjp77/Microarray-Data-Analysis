@@ -21,7 +21,7 @@ class Gene:
         self.ID = rowID;
 
 
-def readInData(prompt, fileName, threshold):
+def readInData(prompt, fileName, threshold=20):
     
     # array of gene object, each of gene class, each one line/row of the file data. 
     genes = [];
@@ -246,10 +246,10 @@ def Preprocess(genes):
             
             if ("A" in genes[i].allCategoryList[j]):
                 ++aCount;
-        
-        for k in range(0, amlCount):
             
-            if ("A" in genes[i].amlCategoryList[k]):
+        for j in range(0, amlCount):
+            
+            if ("A" in genes[i].amlCategoryList[j]):
                 ++aCount;
         
         # [min, max]
@@ -313,7 +313,8 @@ def ClassifyGenes(genesTraining, labelsTraining, genesTesting, labelsTesting):
     knn = KNeighborsClassifier(algorithm = 'auto', leaf_size = 30,  
                                metric = 'minkowski', metric_params = None, n_jobs = 1,
                                n_neighbors = 3, p = 2, weights = 'uniform');
-    
+              #.reshape(-1, 1)                 
+    #print(genesTraining, "\n - \n")
     knn.fit(genesTraining, labelsTraining);  
     
     prediction = knn.predict(genesTesting); 
@@ -343,7 +344,7 @@ def WriteClassifyResultsToFile(testingPrediction, labelsTesting):
         
         file.write("\n");
         
-        for j in range(0, len(testingPrediction)):
+        for i in range(0, len(testingPrediction)):
                 
             file.write(testingPrediction + "\t");
     except:
@@ -384,12 +385,12 @@ def SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting)
     for i in range(0, len(labelsTesting)):
         
         kNNLabelsTesting.append(typeToKNNLabel[labelsTesting[i][:3]]);
-       
+
     return [np.array(selectedTraining), kNNLabelsTraining, np.array(selectedTesting), kNNLabelsTesting];
 
 
 def main():
-    
+
     if args.program_part == "pre":
         inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
         genesTraining = inputTraining[0];
@@ -419,7 +420,7 @@ def main():
         #Rotate(genesTraining); 
         # TODO Makes sure only top 50 selected training genes are sent to this function. 
         # Take from the testing data, the matching genes to the selected top 50 training data genes. 
-        genesKNNArrs = SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting);
+        genesKNNArrs = SelectTestingGenes(top_50_genes, genesTesting, typesTraining, typesTesting);
     
         SaveAffymetrics3(genesTraining, typesTesting);
     
@@ -427,27 +428,17 @@ def main():
 
     else:
         parser.print_help()
-    
-    return 0;
-    
-
-
+        
 main();
 
 
 # ======= To Do ======= 
 
-# PreProcess function:
-# Eliminate the genes with less than two fold change across the experiments (max/min <2);
-# - REVIEW SAVED AFFY FILE, SEE IF SEEMS LIKE RIGHT THINGS REMOVED. ('seems' due to file too large to check all)
+# Load back in the top50 genes file so can be used in the next part of the program.
 
+# determine if doing the reformat function with the full large dataset is too expensive, and if things to need to be reworked to load it like that from the start. 
 
-# Sort genes by p-values/T test stuff Part II 4. a
-
-# Complete KNN stuff.
-
-
-# Once everything else is done, try dif amounts of n_neighbors for the KNN classifier and compare results. 
+# Try dif amounts of n_neighbors for the KNN classifier on full dataset and compare results. 
 
 
 
@@ -467,3 +458,4 @@ main();
 # acute myeloid leukemia (AML) and acute lymphoblastic leukemia (ALL)"
 #
 #
+
