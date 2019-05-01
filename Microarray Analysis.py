@@ -1,8 +1,13 @@
 #!/user/bin/python
 import sys;
 import numpy as np
+import argparse
 from sklearn import datasets
 from sklearn.neighbors import KNeighborsClassifier
+
+parser = argparse.ArgumentParser(description="Run code for the Microarray project.")
+parser.add_argument("program_part", metavar="pre | post", type=str, help="To run pre-Excel functions use pre, to run post-excel functions use post")
+args = parser.parse_args()
 
 class Gene:
     
@@ -385,28 +390,43 @@ def SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting)
 
 def main():
     
-    inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
-    genesTraining = inputTraining[0];
-    typesTraining = inputTraining[1];
-    #print(types);
+    if args.program_part == "pre":
+        inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
+        genesTraining = inputTraining[0];
+        typesTraining = inputTraining[1];
+        #print(types);
     
-    Preprocess(genesTraining); 
-    print("\nProcessed.\n");
-    SaveAffymetrics1(genesTraining, typesTraining);
+        Preprocess(genesTraining); 
+        print("\nProcessed.\n");
+        SaveAffymetrics1(genesTraining, typesTraining);
     
-    # TODO - T test and excel stuff selection of top 50 genes based on p-value
+    elif args.program_part == "post":
+        inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
+        genesTraining = inputTraining[0];
+        typesTraining = inputTraining[1];
+        #print(types);
     
-    inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt", 20);
-    genesTesting = inputTesting[0];
-    typesTesting = inputTesting[1];
-    #Rotate(genesTraining); 
-    # TODO Makes sure only top 50 selected training genes are sent to this function. 
-    # Take from the testing data, the matching genes to the selected top 50 training data genes. 
-    genesKNNArrs = SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting);
+        Preprocess(genesTraining); 
+
+        # TODO - T test and excel stuff selection of top 50 genes based on p-value
+        top_50_input = readInData("Reading the top 50 genes...", "Affymetrics_top50.txt")
+        top_50_genes = top_50_input[0]
+        top_50_types = top_50_input[1]
     
-    SaveAffymetrics3(genesTraining, typesTesting);
+        inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt", 20);
+        genesTesting = inputTesting[0];
+        typesTesting = inputTesting[1];
+        #Rotate(genesTraining); 
+        # TODO Makes sure only top 50 selected training genes are sent to this function. 
+        # Take from the testing data, the matching genes to the selected top 50 training data genes. 
+        genesKNNArrs = SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting);
     
-    ClassifyGenes(Reformat(genesKNNArrs[0]), genesKNNArrs[1], Reformat(genesKNNArrs[2]), genesKNNArrs[3]);
+        SaveAffymetrics3(genesTraining, typesTesting);
+    
+        ClassifyGenes(Reformat(genesKNNArrs[0]), genesKNNArrs[1], Reformat(genesKNNArrs[2]), genesKNNArrs[3]);
+
+    else:
+        parser.print_help()
     
     return 0;
     
