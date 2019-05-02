@@ -344,13 +344,18 @@ def ClassifyGenes(genesTraining, labelsTraining, genesTesting, labelsTesting):
     
     prediction = knn.predict(genesTesting); 
     
-    print("Classifier predictions for testing data:");
-    print(prediction);
+    print("Predic: ", end='');
+    #print(prediction);
+    for i in range(0, len(prediction)):
+        print(prediction[i], end='');
     
-    print("Target labels for testing data:");
-    print(labelsTesting);
+    print("\nTarget: ", end='');
+    
+    for i in range(0, len(labelsTesting)):
+        print(labelsTesting[i], end='');
     
     #WriteClassifyResultsToFile(prediction, labelsTesting);
+    
     
     return 0;
 
@@ -426,11 +431,11 @@ def SelectTestingGenes(top50, genesTraining, genesTesting, typesTraining, typesT
 
 
 
-def DisplaAccuracy(results, targetResults, length):
+def DisplaAccuracy(results, targetResults):
     
     correctCount = 0;
     i = 0;
-    while (i < length):
+    while (i < len(targetResults)):
         
         if (results[i] == targetResults[i]):
             ++correctCount;
@@ -481,7 +486,8 @@ def main():
         #SaveAffymetrics3(genesTraining, typesTesting); #TODO doesn't seem right, check. 
     
         ClassifyGenes(Reformat(genesKNNArrs[0]), genesKNNArrs[1], Reformat(genesKNNArrs[2]), genesKNNArrs[3]);
-
+        
+        
     else: 
         parser.print_help()
         
