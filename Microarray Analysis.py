@@ -20,8 +20,6 @@ class Gene:
         self.amlCategoryList = amlCategory;
         self.ID = rowID;
 
-    def __str__(self):
-        return "AccessionID: {}\nALL List: {}\nAML List: {}\nALL Category List: {}\nAML Category List: {}\n".format(self.accessionId, self.allList, self.amlList, self.allCategoryList, self.amlCategoryList)
 
 def readInData(prompt, fileName, threshold=20):
     
@@ -38,9 +36,6 @@ def readInData(prompt, fileName, threshold=20):
             with open(fileName, "r") as file:
                 
                 firstLine = file.readline().split("\t"); 
-                
-                #for i in range(0, len(firstLine)):
-                 #   print (str(i) + firstLine[i] + "|");
                 
                 # Not sure will need these, but have to pass through them either way.  
                 line = file.readline(); 
@@ -104,6 +99,70 @@ def readInData(prompt, fileName, threshold=20):
     return [genes, firstLine];
 
 
+def readInData2(prompt, fileName, threshold=20):
+    
+    # array of gene object, each of gene class, each one line/row of the file data. 
+    genes = [];
+    notRead = True
+    
+    while (notRead):
+        
+        try:
+            
+            print(prompt); 
+            
+            with open(fileName, "r") as file:
+                
+                file.readline();
+                firstLine = file.readline().split("\t"); 
+                
+                # Keep track of which file line gene is on, so can easily pull testing genes corresponding to selected top 50 training genes. 
+                id = 0;
+                line = file.readline();
+                
+                # Go through remaining lines and get all things interested in.
+                while line:
+                    
+                    line = line.split("\t")
+                        
+                    # second column is Accession ID.
+                    accession = line[0];
+                    all = [];
+                    aml = [];
+                    
+                    j = 1;
+                    # Get each expresson value.
+                    while (j < len(firstLine)):
+                        
+                        if ("ALL" in firstLine[j]):
+                            
+                            # ex: [88, A] for line 7 of input data file
+                            all.append((int)(line[j]));
+                            
+                        elif ("AML" in firstLine[j]):
+                            
+                            aml.append((int)(line[j]));
+                        
+                        j += 1;
+                    #print (len(aml), " - ", len(all));
+                    genes.append(Gene(accession, all, aml, id, [], [])); 
+                    id += 1;
+                    line = file.readline(); 
+        except:
+            print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");
+            sys.exit();
+            
+        else:
+            print("\nFile read successfully.\n");
+            notRead = False;
+            file.close();
+    
+    return [genes, firstLine];
+
+
+
+
+
 # Save Training Data, Part I
 def SaveAffymetrics1(genes, types):
     
@@ -140,40 +199,6 @@ def SaveAffymetrics1(genes, types):
     
     file.close();
     return 0;
-
-
-# Save Testing Data, Part II 4.b
-def SaveAffymetrics2(genes, types):
-    
-    fileName = "affymetrics2.txt";
-        
-    try:
-        
-        file = open(fileName, "w");
-        
-        # ----==== Change label second here to however needed. ====----
-            
-        #expCount = len(genes[0].allList) + len(genes[0].amlList);
-        #label = " \t";
-            
-        #for i in range(0, expCount):
-                
-            #label += "Test_Exp" + str(i + 1) + "\t";
-            
-        #file.write(label + "\n");
-            
-        WriteGenes(genes, file);
-        
-    except:
-        
-        print("\nError writing to ", fileName, "file.\n");
-
-    else:
-        print("\nSecond affymetrics save successful.\n");
-    
-    file.close();
-    
-    return 0; 
 
    
 # Save Testing Data, Part II 5 
@@ -281,16 +306,7 @@ def GetMinMax(list):
     
     return [min, max];
 
-
-
-# Part II, 4.
-def ProcessTraining(genes):
-    
-    
-    return 0;
-
-
-
+# Reformat genes array from that it was loaded in as to the format knn expects. 
 def Reformat(genes):
     
     #orig = [ [1,2,3], [4,5,6]];
@@ -320,8 +336,10 @@ def ClassifyGenes(genesTraining, labelsTraining, genesTesting, labelsTesting):
     knn = KNeighborsClassifier(algorithm = 'auto', leaf_size = 30,  
                                metric = 'minkowski', metric_params = None, n_jobs = 1,
                                n_neighbors = 3, p = 2, weights = 'uniform');
-              #.reshape(-1, 1)                 
-    #print(genesTraining, "\n - \n")
+    #print("classify func genes exp train: ", len(genesTraining)) OK
+    #print("classify func genes train: ", len(genesTraining[0])) OK
+    #print (labelsTraining) OK
+    #print (genesTraining[0]) SEEMS OK
     knn.fit(genesTraining, labelsTraining);  
     
     prediction = knn.predict(genesTesting); 
@@ -368,32 +386,43 @@ def WriteClassifyResultsToFile(testingPrediction, labelsTesting):
 # Select matching testing genes corresponding to traing selections, and form
 # label and gene expression arrays in the format required by knn.fit(). 
 # make sure only training genes list with top 50, or however many selected genes in passed in, not full genes list.
-def SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting): 
+def SelectTestingGenes(top50, genesTraining, genesTesting, typesTraining, typesTesting): 
     
     selectedTraining = [];
     selectedTesting = [];
     typeToKNNLabel = { "ALL" : 0, "AML" : 1};
-    labelsTraining = typesTraining[2:-1:2];
+    labelsTraining = typesTraining; #len(typesTraining)
     labelsTesting = typesTesting[2:-1:2];
     kNNLabelsTraining = [];
     kNNLabelsTesting = [];
     
+    #print (len(labelsTraining))
+    #print (len(labelsTesting))
+    #print (len(genesTraining[0].allList), " - ", len(genesTraining[0].amlList))
+    #print (len(genesTesting[0].allList + genesTesting[0].amlList))
+    
     # For each of the top 50 selected genes in the training data, get the matching ones
     # from the testing data for future classification.  
-    for i in range(0, len(genesTraining)):
+    for i in range(0, len(top50)):
         
-        selectedTraining.append( np.append(genesTraining[i].allList, genesTraining[i].amlList, axis = 0) );
-        selectedTesting.append( np.append(genesTesting[genesTraining[i].ID].allList, genesTesting[genesTraining[i].ID].amlList, axis = 0) ); 
+        for k in range(0, len(genesTraining)):
+            
+            if (genesTraining[k].accessionId == top50[i].accessionId):
+                selectedTraining.append( np.append(genesTraining[k].allList, genesTraining[k].amlList, axis = 0) );
+                selectedTesting.append( np.append(genesTesting[genesTraining[k].ID].allList, genesTesting[genesTraining[k].ID].amlList, axis = 0) ); 
+                break;
     
-    for i in range(0, len(labelsTraining)):
+    for i in range(1, len(labelsTraining)):
         
-        kNNLabelsTraining.append(typeToKNNLabel[labelsTraining[i][:3]]);
-         
+        kNNLabelsTraining.append(typeToKNNLabel[labelsTraining[i][1:4]]);
+    
     for i in range(0, len(labelsTesting)):
         
         kNNLabelsTesting.append(typeToKNNLabel[labelsTesting[i][:3]]);
-
-    return [np.array(selectedTraining), kNNLabelsTraining, np.array(selectedTesting), kNNLabelsTesting];
+        
+    #print (len(selectedTraining[0])) # ---- Coming out ok. 
+    
+    return [selectedTraining, kNNLabelsTraining, selectedTesting, kNNLabelsTesting];
 
 
 
@@ -427,30 +456,33 @@ def main():
     elif args.program_part == "post":
         inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
         genesTraining = inputTraining[0];
-        typesTraining = inputTraining[1];
+        typesTraining = inputTraining[1]; #TODO can take this out ince get top 50 working since will use it instead. 
         #print(types);
     
         Preprocess(genesTraining); 
 
-        # TODO - T test and excel stuff selection of top 50 genes based on p-value
-        top_50_input = readInData("Reading the top 50 genes...", "readyToReadTop50.txt")
+        top_50_input = readInData2("Reading the top 50 genes...", "Affymetrics_top50.txt", 20)
         top_50_genes = top_50_input[0]
         top_50_types = top_50_input[1]
         
+        
+        #readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);#
         inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt", 20);
         genesTesting = inputTesting[0];
-        typesTesting = inputTesting[1];
-        #Rotate(genesTraining); 
+        typesTesting = inputTesting[1]; #print (len(top_50_genes[0].allList), " - ", len(top_50_genes[0].amlList))
+        
         # TODO Makes sure only top 50 selected training genes are sent to this function. 
         # Take from the testing data, the matching genes to the selected top 50 training data genes. 
-        genesKNNArrs = SelectTestingGenes(top_50_genes, genesTesting, top_50_types[:len(top_50_types)-2], typesTesting);
-        # genesKNNArrs = SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting);
+        genesKNNArrs = SelectTestingGenes(top_50_genes, genesTraining, genesTesting, top_50_types, typesTesting);
+        
+        #print ( Reformat(genesKNNArrs[0])) # from top 50 post processing on line above
+        #print (Reformat(genesKNNArrs[2])) # testing loaded in normally that works for sure
     
-        SaveAffymetrics3(genesTraining, typesTesting);
+        #SaveAffymetrics3(genesTraining, typesTesting); #TODO doesn't seem right, check. 
     
         ClassifyGenes(Reformat(genesKNNArrs[0]), genesKNNArrs[1], Reformat(genesKNNArrs[2]), genesKNNArrs[3]);
 
-    else:
+    else: 
         parser.print_help()
         
 main();
