@@ -461,7 +461,7 @@ def main():
     elif args.program_part == "post":
         inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
         genesTraining = inputTraining[0];
-        typesTraining = inputTraining[1]; #TODO can take this out ince get top 50 working since will use it instead. 
+        typesTraining = inputTraining[1];  
         #print(types);
     
         Preprocess(genesTraining); 
@@ -476,7 +476,7 @@ def main():
         genesTesting = inputTesting[0];
         typesTesting = inputTesting[1]; #print (len(top_50_genes[0].allList), " - ", len(top_50_genes[0].amlList))
         
-        # TODO Makes sure only top 50 selected training genes are sent to this function. 
+        # Make sure only top 50 selected training genes are sent to this function. 
         # Take from the testing data, the matching genes to the selected top 50 training data genes. 
         genesKNNArrs = SelectTestingGenes(top_50_genes, genesTraining, genesTesting, top_50_types, typesTesting);
         
@@ -496,20 +496,8 @@ main();
 
 # ======= To Do ======= 
 
-# Load back in the top50 genes file so can be used in the next part of the program.
-
 
 # Try dif amounts of n_neighbors for the KNN classifier on full dataset and compare results. 
-
-
-
-# ======= Finished From To Do =======
-
-# - Output read in file and print to test if coming in ok.
-# - Test/review SaveAffymetrics1 produced data compared to project example out put shown. 
-# - - Opened in excel, format matches expected fine. 
-# - - Types being filled ok. 
-
 
 
 
