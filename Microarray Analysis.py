@@ -20,6 +20,8 @@ class Gene:
         self.amlCategoryList = amlCategory;
         self.ID = rowID;
 
+    def __str__(self):
+        return "AccessionID: {}\nALL List: {}\nAML List: {}\nALL Category List: {}\nAML Category List: {}\n".format(self.accessionId, self.allList, self.amlList, self.allCategoryList, self.amlCategoryList)
 
 def readInData(prompt, fileName, threshold=20):
     
@@ -431,7 +433,7 @@ def main():
         Preprocess(genesTraining); 
 
         # TODO - T test and excel stuff selection of top 50 genes based on p-value
-        top_50_input = readInData("Reading the top 50 genes...", "Affymetrics_top50.txt")
+        top_50_input = readInData("Reading the top 50 genes...", "readyToReadTop50.txt")
         top_50_genes = top_50_input[0]
         top_50_types = top_50_input[1]
         
@@ -441,7 +443,8 @@ def main():
         #Rotate(genesTraining); 
         # TODO Makes sure only top 50 selected training genes are sent to this function. 
         # Take from the testing data, the matching genes to the selected top 50 training data genes. 
-        genesKNNArrs = SelectTestingGenes(top_50_genes, genesTesting, typesTraining, typesTesting);
+        genesKNNArrs = SelectTestingGenes(top_50_genes, genesTesting, top_50_types[:len(top_50_types)-2], typesTesting);
+        # genesKNNArrs = SelectTestingGenes(genesTraining, genesTesting, typesTraining, typesTesting);
     
         SaveAffymetrics3(genesTraining, typesTesting);
     
