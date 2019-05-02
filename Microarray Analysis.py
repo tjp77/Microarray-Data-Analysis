@@ -344,15 +344,18 @@ def ClassifyGenes(genesTraining, labelsTraining, genesTesting, labelsTesting):
     
     prediction = knn.predict(genesTesting); 
     
-    print("Predic: ", end='');
-    #print(prediction);
+    total = len(prediction);
+    
+    predictedResults = "Predic: ";
+    targetResults = "Target: ";
+    
     for i in range(0, len(prediction)):
-        print(prediction[i], end='');
+        
+        predictedResults += str(prediction[i]); #TODO add counter to check which are correct for accuracy percentage. 
+        targetResults += str(labelsTesting[i]);
     
-    print("\nTarget: ", end='');
-    
-    for i in range(0, len(labelsTesting)):
-        print(labelsTesting[i], end='');
+    print (predictedResults);
+    print (targetResults);
     
     #WriteClassifyResultsToFile(prediction, labelsTesting);
     
@@ -466,7 +469,7 @@ def main():
     
         Preprocess(genesTraining); 
 
-        top_50_input = readInData2("Reading the top 50 genes...", "Affymetrics_top50.txt", 20)
+        top_50_input = readInData2("Reading the top 50 genes...", "tmp_top.txt", 20)
         top_50_genes = top_50_input[0]
         top_50_types = top_50_input[1]
         
@@ -474,15 +477,12 @@ def main():
         #readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);#
         inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt", 20);
         genesTesting = inputTesting[0];
-        typesTesting = inputTesting[1]; #print (len(top_50_genes[0].allList), " - ", len(top_50_genes[0].amlList))
+        typesTesting = inputTesting[1]; 
         
         # Make sure only top 50 selected training genes are sent to this function. 
         # Take from the testing data, the matching genes to the selected top 50 training data genes. 
         genesKNNArrs = SelectTestingGenes(top_50_genes, genesTraining, genesTesting, top_50_types, typesTesting);
-        
-        #print ( Reformat(genesKNNArrs[0])) # from top 50 post processing on line above
-        #print (Reformat(genesKNNArrs[2])) # testing loaded in normally that works for sure
-    
+
         #SaveAffymetrics3(genesTraining, typesTesting); #TODO doesn't seem right, check. 
     
         ClassifyGenes(Reformat(genesKNNArrs[0]), genesKNNArrs[1], Reformat(genesKNNArrs[2]), genesKNNArrs[3]);
