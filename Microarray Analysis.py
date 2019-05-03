@@ -99,33 +99,25 @@ def readInData(prompt, fileName, threshold=20):
     return [genes, firstLine];
 
 
-def readInData2(prompt, fileName, threshold=20):
+def readInTop50(prompt, fileName, threshold=20):
     
-    # array of gene object, each of gene class, each one line/row of the file data. 
     genes = [];
     notRead = True
     
     while (notRead):
         
         try:
-            
             print(prompt); 
             
             with open(fileName, "r") as file:
                 
                 file.readline();
                 firstLine = file.readline().split("\t"); 
-                
-                # Keep track of which file line gene is on, so can easily pull testing genes corresponding to selected top 50 training genes. 
-                id = 0;
                 line = file.readline();
-                
-                # Go through remaining lines and get all things interested in.
+
                 while line:
                     
                     line = line.split("\t")
-                        
-                    # second column is Accession ID.
                     accession = line[0];
                     all = [];
                     aml = [];
@@ -136,7 +128,6 @@ def readInData2(prompt, fileName, threshold=20):
                         
                         if ("ALL" in firstLine[j]):
                             
-                            # ex: [88, A] for line 7 of input data file
                             all.append((int)(line[j]));
                             
                         elif ("AML" in firstLine[j]):
@@ -145,8 +136,7 @@ def readInData2(prompt, fileName, threshold=20):
                         
                         j += 1;
                     
-                    genes.append(Gene(accession, all, aml, id, [], [])); 
-                    id += 1;
+                    genes.append(Gene(accession, all, aml, 0, [], [])); 
                     line = file.readline(); 
         except:
             print("\nTrouble reading input file. Make sure name is correct and the file is in the right format.\n");
@@ -443,7 +433,7 @@ def main():
     
     elif args.program_part == "post":
 
-        top_50_input = readInData2("Reading the top 50 genes...", "tmp_top.txt", 20)
+        top_50_input = readInTop50("Reading the top 50 genes...", "tmp_top.txt", 20)
         top_50_genes = top_50_input[0]
         top_50_types = top_50_input[1]
         
