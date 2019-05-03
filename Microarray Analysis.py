@@ -84,7 +84,7 @@ def readInData(prompt, fileName, threshold=20):
                         
                         j += 2;
                     
-                    genes.append(Gene(accession, all, aml, id, allCategory, amlCategory)); #print(genes[-1].allList, "\n\n");
+                    genes.append(Gene(accession, all, aml, id, allCategory, amlCategory)); 
                     id += 1;
                     line = file.readline(); 
         except:
@@ -144,7 +144,7 @@ def readInData2(prompt, fileName, threshold=20):
                             aml.append((int)(line[j]));
                         
                         j += 1;
-                    #print (len(aml), " - ", len(all));
+                    
                     genes.append(Gene(accession, all, aml, id, [], [])); 
                     id += 1;
                     line = file.readline(); 
@@ -160,9 +160,6 @@ def readInData2(prompt, fileName, threshold=20):
     return [genes, firstLine];
 
 
-
-
-
 # Save Training Data, Part I
 def SaveAffymetrics1(genes, types):
     
@@ -175,7 +172,6 @@ def SaveAffymetrics1(genes, types):
         expCount = len(genes[0].allList) + len(genes[0].amlList);
         label1 = " \t";
         label2 = " \t";
-        #print(genes[0].allList); 
             
         j = 2; 
             
@@ -309,8 +305,6 @@ def GetMinMax(list):
 # Reformat genes array from that it was loaded in as to the format knn expects. 
 def Reformat(genes):
     
-    #orig = [ [1,2,3], [4,5,6]];
-    #print (orig);
     new = [];
     
     i = 0; j = 0; k = 1;
@@ -325,40 +319,44 @@ def Reformat(genes):
             k+=1;
             
         i+=1; k = 1;
-    
-    #print (new);
+
     return new;
 
 # Part III, KNN
 # https://scikit-learn.org/stable/modules/generated/sklearn.svm.libsvm.fit.html#sklearn.svm.libsvm.fit
 def ClassifyGenes(genesTraining, labelsTraining, genesTesting, labelsTesting):
     
-    knn = KNeighborsClassifier(algorithm = 'auto', leaf_size = 30,  
-                               metric = 'minkowski', metric_params = None, n_jobs = 1,
-                               n_neighbors = 3, p = 2, weights = 'uniform');
-    #print("classify func genes exp train: ", len(genesTraining)) OK
-    #print("classify func genes train: ", len(genesTraining[0])) OK
-    #print (labelsTraining) OK
-    #print (genesTraining[0]) SEEMS OK
-    knn.fit(genesTraining, labelsTraining);  
+    k = 5;
+    alg = "auto";
+    metric = "minkowski";
+    weight = "uniform";
+    knn = KNeighborsClassifier(algorithm = alg, leaf_size = 30,  
+                               metric = metric, metric_params = None, n_jobs = 1,
+                               n_neighbors = k, p = 2, weights = weight);
     
+    knn.fit(genesTraining, labelsTraining);  
     prediction = knn.predict(genesTesting); 
     
     total = len(prediction);
-    
+    correctMatchCount = 0;
     predictedResults = "Predic: ";
     targetResults = "Target: ";
     
     for i in range(0, len(prediction)):
         
-        predictedResults += str(prediction[i]); #TODO add counter to check which are correct for accuracy percentage. 
+        predictedResults += str(prediction[i]); 
         targetResults += str(labelsTesting[i]);
+        
+        if (str(prediction[i]) == str(labelsTesting[i])):
+            correctMatchCount += 1;
     
     print (predictedResults);
     print (targetResults);
     
-    #WriteClassifyResultsToFile(prediction, labelsTesting);
+    print ("\nPredicted Results Accuracy: ", str(round(correctMatchCount/total, 3) * 100) + "%\nWith:");
+    print ("k = " + str(k), "\nMAlgorithm = " + alg, "\nMetric = " + metric, "\n" + weight + " weight");
     
+    WriteClassifyResultsToFile(prediction, labelsTesting);
     
     return 0;
 
@@ -373,20 +371,20 @@ def WriteClassifyResultsToFile(testingPrediction, labelsTesting):
             
         for i in range(0, len(labelsTesting)):
                 
-            file.write(labelsTesting + "\t");
+            file.write(str(labelsTesting[i]) + "\t");
         
         file.write("\n");
         
         for i in range(0, len(testingPrediction)):
                 
-            file.write(testingPrediction + "\t");
+            file.write(str(testingPrediction[i]) + "\t");
     except:
         
         print("\nError writing to ", fileName, "file.\n");
 
     else:
         print("\nClassification result save successful.\n");
-            
+        
     file.close();
     return 0;
 
@@ -394,30 +392,26 @@ def WriteClassifyResultsToFile(testingPrediction, labelsTesting):
 # Select matching testing genes corresponding to traing selections, and form
 # label and gene expression arrays in the format required by knn.fit(). 
 # make sure only training genes list with top 50, or however many selected genes in passed in, not full genes list.
-def SelectTestingGenes(top50, genesTraining, genesTesting, typesTraining, typesTesting): 
+def SelectTestingGenes(top50, genesTesting, top50Types, typesTesting): 
     
     selectedTraining = [];
     selectedTesting = [];
     typeToKNNLabel = { "ALL" : 0, "AML" : 1};
-    labelsTraining = typesTraining; #len(typesTraining)
+    labelsTraining = top50Types; 
     labelsTesting = typesTesting[2:-1:2];
     kNNLabelsTraining = [];
     kNNLabelsTesting = [];
-    
-    #print (len(labelsTraining))
-    #print (len(labelsTesting))
-    #print (len(genesTraining[0].allList), " - ", len(genesTraining[0].amlList))
-    #print (len(genesTesting[0].allList + genesTesting[0].amlList))
     
     # For each of the top 50 selected genes in the training data, get the matching ones
     # from the testing data for future classification.  
     for i in range(0, len(top50)):
         
-        for k in range(0, len(genesTraining)):
+        for k in range(0, len(genesTesting)):
             
-            if (genesTraining[k].accessionId == top50[i].accessionId):
-                selectedTraining.append( np.append(genesTraining[k].allList, genesTraining[k].amlList, axis = 0) );
-                selectedTesting.append( np.append(genesTesting[genesTraining[k].ID].allList, genesTesting[genesTraining[k].ID].amlList, axis = 0) ); 
+            if (genesTesting[k].accessionId == top50[i].accessionId):
+                
+                selectedTraining.append( np.append(top50[i].allList, top50[i].amlList, axis = 0) );
+                selectedTesting.append( np.append(genesTesting[k].allList, genesTesting[k].amlList, axis = 0) ); 
                 break;
     
     for i in range(1, len(labelsTraining)):
@@ -428,65 +422,42 @@ def SelectTestingGenes(top50, genesTraining, genesTesting, typesTraining, typesT
         
         kNNLabelsTesting.append(typeToKNNLabel[labelsTesting[i][:3]]);
         
-    #print (len(selectedTraining[0])) # ---- Coming out ok. 
-    
     return [selectedTraining, kNNLabelsTraining, selectedTesting, kNNLabelsTesting];
-
-
-
-def DisplaAccuracy(results, targetResults):
-    
-    correctCount = 0;
-    i = 0;
-    while (i < len(targetResults)):
-        
-        if (results[i] == targetResults[i]):
-            ++correctCount;
-        ++i;
-    
-    print ("Predicted Results Accuracy: ", correctCount/length, "%")
-    
-    return 0;
 
 
 def main():
 
     if args.program_part == "pre":
+        
         inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
         genesTraining = inputTraining[0];
         typesTraining = inputTraining[1];
-        #print(types);
     
         Preprocess(genesTraining); 
         print("\nProcessed.\n");
         SaveAffymetrics1(genesTraining, typesTraining);
+        
+        # SaveAffymetrics2 would have been the second file save requested in instructions, the
+        # post T-Test file, had it been done in code rather then excel. Numbers kept as if 
+        # all three were done here for easier tracking of what was from what step. 
     
     elif args.program_part == "post":
-        inputTraining = readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);
-        genesTraining = inputTraining[0];
-        typesTraining = inputTraining[1];  
-        #print(types);
-    
-        Preprocess(genesTraining); 
 
         top_50_input = readInData2("Reading the top 50 genes...", "tmp_top.txt", 20)
         top_50_genes = top_50_input[0]
         top_50_types = top_50_input[1]
         
-        
-        #readInData("Loading ALL_vs_AML_train_set_38_sorted.txt .....", "ALL_vs_AML_train_set_38_sorted.txt", 20);#
         inputTesting = readInData("Loading Leuk_ALL_AML.test .....", "Leuk_ALL_AML.test.txt", 20);
         genesTesting = inputTesting[0];
         typesTesting = inputTesting[1]; 
         
+        SaveAffymetrics3(genesTesting, typesTesting);
+        
         # Make sure only top 50 selected training genes are sent to this function. 
         # Take from the testing data, the matching genes to the selected top 50 training data genes. 
-        genesKNNArrs = SelectTestingGenes(top_50_genes, genesTraining, genesTesting, top_50_types, typesTesting);
-
-        #SaveAffymetrics3(genesTraining, typesTesting); #TODO doesn't seem right, check. 
-    
-        ClassifyGenes(Reformat(genesKNNArrs[0]), genesKNNArrs[1], Reformat(genesKNNArrs[2]), genesKNNArrs[3]);
+        genesKNNArrs = SelectTestingGenes(top_50_genes, genesTesting, top_50_types, typesTesting);
         
+        ClassifyGenes(Reformat(genesKNNArrs[0]), genesKNNArrs[1], Reformat(genesKNNArrs[2]), genesKNNArrs[3]);
         
     else: 
         parser.print_help()
